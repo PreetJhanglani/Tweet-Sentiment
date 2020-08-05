@@ -104,15 +104,19 @@ body {
      <h3> The Overall Sentiment is: &emsp;{{sent}}. </h3>
      <h3> The Predicted Compound value is &emsp;{{cv}} <br> The Predicted Polarity is &emsp;{{pol}} <br> The Predicted Subjectivity is &emsp;{{sub}} </h3>
       <center><p>BAR CHART</p> -->
+      {{ sentiment|safe }}
+      
+      <left><p>{{Bar|safe}}</p>  
+        <img src= "{{plot}}"/></left>
+      <right><p>{{word_cloud|safe}}</p>
+        <img src = "{{wc}}"/></right>
+      {{ val|safe }}
       {{ hashtag|safe }}
       {{ text|safe }}
       {% for table in tables %}
               {{ table|safe }}
-      {% endfor %}  
-      {{ sentiment|safe }}
-      {{ val|safe }}
-      <center><p>{{Bar|safe}}</p>  
-      <img src= "{{plot}}"/></center>
+      {% endfor %}
+      
     </div>
 
 </body>
