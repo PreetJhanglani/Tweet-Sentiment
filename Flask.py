@@ -1,3 +1,5 @@
+import sys
+
 from flask import Flask, render_template, request, redirect, url_for
 import pandas as pd
 import numpy as np
@@ -7,6 +9,9 @@ import Get_clean_tweets
 from wordcloud import WordCloud,ImageColorGenerator
 from PIL import Image
 import urllib
+import matplotlib
+matplotlib.use('Agg')
+
 import requests
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -92,7 +97,13 @@ def get_data():
     x = str(keyword) 
     c = int(count)
     pic = os.path.join(app.config['UPLOAD_FOLDER'], 'new_plot.png')
-    df,hsh = Get_clean_tweets.inputq(x,c) 
+    df,hsh = Get_clean_tweets.inputq(x,c)
+    new_hsh = "The Hastags in the given tweets are:- "
+    for i in hsh:
+        if i != []:
+            for j in i:
+                new_hsh = new_hsh + j + ", "
+
     predict = pipeline.predict(df['cleaned_text'])
     cvl = []
     subl = []
@@ -119,18 +130,29 @@ def get_data():
         sent = "Negative"
     # return "<img src= Static/img/new_plot.png>"
     df['cv'] = cvl
+    cv_color = '#111'
     if sent == "Positive":
         all_words_positive = ' '.join(text for text in df['cleaned_text'][df['cv']>=0.05])
+        cv_color = '#005220'
+        cv_colo = '#005220'
         wc = word_cloud(all_words_positive , 'Greens_r')
     elif sent == "Negative":
+        cv_color = '#E12D25'
         all_words_negative = ' '.join(text for text in df['cleaned_text'][df['cv']<=(-0.05)])
         wc = word_cloud(all_words_negative, 'Reds')
     elif sent == "Neutral":
+        cv_color = '#074589'
         all_words_neutral = ' '.join(text for text in df['cleaned_text'][(df['cv'] < (0.05)) & (df['cv'] > (-0.05))])
         wc = word_cloud(all_words_neutral, 'Blues')
-
-    txt = pd.DataFrame(df['text'])
-    return render_template('home.html', hashtag = '<h3>The hashtags in tweet are:</h3> &emsp;<b>{hsh}</b><br>'.format(hsh = hsh),text = '<h3>The tweets are:</h3> &emsp;<br>',  tables = [txt.to_html(classes = 'data', header = "true", justify = "center")], sentiment = '<h3>The Overall Sentiment is: &emsp;{sent}</h3>'.format(sent = sent), val = '<h3>The Predicted Compound value is: &emsp;{cv}</h3><h3>The Predicted Polarity is: &emsp;{pol}</h3><h3>The Predicted Subjectivity is: &emsp;{sub}</h3>'.format( cv = cv, pol = pol, sub = sub), Bar = '<b>BAR PLOT</b>',  plot = plotgraph, word_cloud = '<b>WORD CLOUD</b>', wc = wc)
+    txt = df['text']
+    txt = '<table><thead><tr><th scope="col">Sr No.</th><th scope="col">Tweets</th></tr></thead><tbody>'
+    c =1
+    for i in df['text']:
+        txt = txt + '<tr><td data-label="Sr No">'+ str(c) +'</td><td data-label="Due Date">'+i+'</td></tr>'
+        c=c+1
+    txt = txt + '</tbody></table>'
+    # txt = pd.DataFrame(df['text'])
+    return render_template('home.html', hashtag = '<h2 style=" text-align: center; color:#111;">Hashtags</h2> &emsp;<p style="text-align:center;">{hsh}</p><br>'.format(hsh = new_hsh),text = '<h2  style=" text-align: center; color:#111;">Tweets</h2> &emsp;<br>',  table = txt, sentiment = '<h3 style=" text-align: center;">The Overall Sentiment is: &emsp;{sent}</h3>'.format(sent = sent), val = '<h3  style=" text-align: center;">The Predicted Compound value is: &emsp;<span style="color: {cv_color}">{cv}</span></h3><h3  style=" text-align: center;">The Predicted Polarity is:  <span style="color: {cv_color}">{pol}</span></h3><h3  style=" text-align: center;">The Predicted Subjectivity is: &emsp;<span style="color: {cv_color}">{sub}</span></h3>'.format( cv = cv, pol = pol, sub = sub, cv_color = cv_color), Bar = '<b>BAR PLOT</b>',  plot = plotgraph, word_cloud = '<b>WORD CLOUD</b>', wc = wc)
 # @app.route("/", methods=["GET"])
 '''<h3>The tweets are:</h3> &emsp;{text}<br>'.format(text ='''
 # def plotView():
