@@ -18,7 +18,7 @@ try:
     # set access token and secret 
     auth.set_access_token(access_token, access_token_secret) 
     # create tweepy API object to fetch tweets 
-    api = tweepy.API(auth, wait_on_rate_limit = True, wait_on_rate_limit_notify = True) 
+    api = tweepy.API(auth, wait_on_rate_limit = True) 
 except: 
     print("Error: Authentication Failed")
 
@@ -31,7 +31,7 @@ def get_tweets(query, count = 10):
     count = int(count)
     try: 
         # call twitter api to fetch tweets 
-        fetched_tweets =tweepy.Cursor(api.search , q = query, lang = "en" ,tweet_mode = 'extended', truncated = False ).items(count)
+        fetched_tweets =tweepy.Cursor(api.search_tweets , q = query, lang = "en" ,tweet_mode = 'extended').items(count)
         
         # parsing tweets one by one 
         for tweet in fetched_tweets: 
